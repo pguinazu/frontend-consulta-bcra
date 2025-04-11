@@ -6,7 +6,8 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": ["styled-components"]
   },
   "include": [
     "**/*.ts",
