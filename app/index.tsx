@@ -5,39 +5,91 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getCreditSituationByCuil as getCreditSituation } from '@/services/bcraService';
 import React from "react";
 import { useRouter } from "expo-router";
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { cuilSchema } from '@/validation/cuilSchema'; // ruta según tu estructura
 
 export default function Index() {
-  const [cuil, setCuil] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
   const router = useRouter();
   const getCreditSituationByCuil = async () => {
-    console.log('cuil', cuil);
-    
-    //TODO: get info from public api
-    // getCreditSituation(cuil);
-    const response = await getCreditSituation(cuil);
-    // const json = await response.json();
-    console.log('response json', response);
-    router.push({
-      pathname: '/resultado-crediticio',
-      params: {
-        data: JSON.stringify(response)
+    try {
+      //TODO: get info from public api
+      // getCreditSituation(cuil);
+      setLoading(true);
+      const response = await getCreditSituation(control._formValues.cuil);
+      setLoading(false);
+  
+      //sin datos
+      if (!response?.results.periodos?.length) {
+        router.navigate({
+          pathname: '/consulta-bcra-error',
+          params: {
+            message: 'No se encontraron datos para el CUIL ingresado.',
+            suggestion: 'Puede que no tenga un historial crediticio registrado en el BCRA.'
+          }
+        });
+        return;
       }
-    });
+  
+      // const json = await response.json();
+      console.log('response json', response);
+      router.push({
+        pathname: '/resultado-crediticio',
+        params: {
+          data: JSON.stringify(response)
+        }
+      });
+    } catch (error: any) {
+      setLoading(false);
+      console.log('error', error);
+      
+      router.push({
+        pathname: '/consulta-bcra-error',
+        params: {
+          message: 'Ocurrio un error al consultar la situación crediticia.',
+          suggestion: error.message
+        }
+      })
+    }
   }
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(cuilSchema),
+    mode: 'onChange', //activa validacion al escribir para no esperar submit
+    reValidateMode: 'onChange', // vuelve a validar en cambios posteriores
+  });
 
   return (
     <View
       style={styles.container}
     >
-      <Ionicons name="wallet" size={100} color="#4F46E5" />
-      <Text style={styles.title}>Situación crediticia por CUIL</Text>
-      {/* //CUIL */}
-      <View style={styles.cuilInputContainer}>
-        <CuilInput value={cuil} setCuil={(val) => setCuil(val)} />
+      <View style={styles.container}>
+        <Ionicons name="wallet" size={100} color="#4F46E5" />
+        <Text style={styles.title}>Situación crediticia por CUIL</Text>
+        {/* //CUIL */}
+        <View style={styles.cuilInputContainer}>
+          <Controller
+            control={control}
+            name="cuil"
+            render={({ field: { onChange, value } }) => (
+              <CuilInput
+                value={value}
+                onChangeText={onChange}
+                error={errors.cuil?.message}
+              />
+            )}
+          />
+        </View>
+        <Pressable style={errors.cuil || loading ? styles.btnDisabled : styles.btn} 
+          onPress={getCreditSituationByCuil} disabled={errors.cuil?.message && errors.cuil?.message?.length > 0 || loading}> 
+          <Text style={styles.btnTxt}>Consultar</Text>
+        </Pressable>
       </View>
-      <Pressable style={styles.btn} onPress={getCreditSituationByCuil}> 
-        <Text style={styles.btnTxt}>Consultar</Text>
-      </Pressable>
     </View>
   );
 }
@@ -71,6 +123,15 @@ const styles = StyleSheet.create({
     bottom: 30,
     alignSelf: 'center',
     backgroundColor: '#4F46E5',
+    padding: 10,
+    borderRadius: 5,
+    width: '90%',
+  },
+  btnDisabled: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: '#9CA3AF',
     padding: 10,
     borderRadius: 5,
     width: '90%',
