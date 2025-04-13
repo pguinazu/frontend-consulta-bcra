@@ -85,9 +85,9 @@ export default function Index() {
             )}
           />
         </View>
-        <Pressable style={errors.cuil || loading ? styles.btnDisabled : styles.btn} 
-          onPress={getCreditSituationByCuil} disabled={errors.cuil?.message && errors.cuil?.message?.length > 0 || loading}> 
-          <Text style={styles.btnTxt}>Consultar</Text>
+        <Pressable style={ !control._formValues.cuil || errors.cuil || loading ? styles.btnDisabled : styles.btn} 
+          onPress={handleSubmit(getCreditSituationByCuil)} disabled={ !control._formValues.cuil || errors.cuil?.message && errors.cuil?.message?.length > 0 || loading}> 
+          <Text style={errors.cuil || loading ? styles.btnTxtDisabled : styles.btnTxt}>Consultar</Text>
         </Pressable>
       </View>
     </View>
@@ -131,13 +131,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     alignSelf: 'center',
-    backgroundColor: '#9CA3AF',
+    backgroundColor: '#6B7280',
     padding: 10,
     borderRadius: 5,
     width: '90%',
   },
   btnTxt: {
     color: "#ffffff",
+    textAlign: "center",
+    fontSize: 20,
+  },
+  btnTxtDisabled: {
+    color: "#D1D5DB",
     textAlign: "center",
     fontSize: 20,
   }
