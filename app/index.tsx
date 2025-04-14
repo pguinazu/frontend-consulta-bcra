@@ -76,7 +76,7 @@ export default function Index() {
           <Controller
             control={control}
             name="cuil"
-            render={({ field: { onChange, value } }) => (
+            render={({ field: { value, onChange } }) => (
               <CuilInput
                 value={value}
                 onChangeText={onChange}

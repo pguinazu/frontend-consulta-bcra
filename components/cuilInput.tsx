@@ -1,5 +1,6 @@
 import React from 'react';
 import {StyleSheet, Text, TextInput, View} from 'react-native';
+import { MaskedTextInput } from 'react-native-mask-text';
 
 type Props = {
     value: string;
@@ -10,16 +11,18 @@ type Props = {
 const CuilInput = ({value, onChangeText, error}: Props) => {
   return (
     <View>
-        <TextInput
-          style={error ? styles.inputError : styles.input}
-          onChangeText={onChangeText}
-          value={value}
-          keyboardType='numeric'
-          placeholder='00-00000000-0'
-          placeholderTextColor='#9CA3AF'
-          textAlign='center'
-          maxLength={11}
-        />
+      <MaskedTextInput
+        mask="99-99999999-9"
+        onChangeText={(text: string, rawText: string) => {
+          if (value !== rawText) {
+            onChangeText(rawText); // Mandás el valor sin máscara al form
+          }
+        }}
+        style={[styles.input, error && styles.inputError]}
+        placeholder="00-00000000-0"
+        placeholderTextColor="#9CA3AF"
+        multiline={true} //mantiene centrado el cursor
+      />
         {error 
           ? <Text style={styles.error}>{error}</Text>
           : <Text style={styles.subtitle}>Consultá tu estado crediticio en segundos, con datos oficiales del BCRA</Text>
@@ -55,7 +58,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     textAlign: 'center',
     fontFamily: "Mulish",
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   subtitle: {
     fontSize: 15,
