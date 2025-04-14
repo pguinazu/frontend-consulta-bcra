@@ -22,6 +22,7 @@ const CuilInput = ({value, onChangeText, error}: Props) => {
         placeholder="00-00000000-0"
         placeholderTextColor="#9CA3AF"
         multiline={true} //mantiene centrado el cursor
+        keyboardType='numeric'
       />
         {error 
           ? <Text style={styles.error}>{error}</Text>
